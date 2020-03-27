@@ -1,0 +1,9 @@
+test_or_train,dialect_region,speaker_id,path_from_data_dir
+TRAIN,R1,S1,train/R1/S1_1.WAV
+TRAIN,R1,S1,train/R1/S1_1.PHN
+TRAIN,R1,S1,train/R1/S1_1.WRD
+TRAIN,R1,S1,train/R1/S1_1.PHN
+TEST,DR4,S3,test/S3_1.wav
+TEST,DR4,S3,test/S3_1.PHN
+TEST,DR4,S3,test/S3_1.TXT
+TEST,DR4,S3,test/S3_1.WRD
