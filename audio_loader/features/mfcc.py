@@ -44,22 +44,24 @@ class WindowedMFCC(FeatureExtractor):
         """
         self.check_sampling_rate(sampling_rate)
 
-        signal = signal.T
-        features = librosa.feature.mfcc(
-            signal[0], sampling_rate, n_mfcc=self.n_mfcc, dct_type=2,
-            norm='ortho', n_fft=self.win_size, hop_length=self.hop_size, htk=False,
-            center=True, pad_mode='reflect'
-        )
+        def compute_mfcc(signal):
+            """Compute MFCC with fixed parameters."""
+            return librosa.feature.mfcc(
+                signal, sampling_rate, n_mfcc=self.n_mfcc, dct_type=2,
+                norm='ortho', n_fft=self.win_size, hop_length=self.hop_size, htk=False,
+                center=True, pad_mode='reflect'
+            )
 
+        # computation of the first channel
+        signal = signal.T
+        features = compute_mfcc(signal[0])
+
+        # computation and reshape of the next channels
         features = features.reshape(1, *features.shape)
         for i in range(1, signal.shape[0]):
             features = np.concatenate(
                 (features,
-                 librosa.feature.mfcc(
-                     signal[i], sampling_rate, n_mfcc=self.n_mfcc, dct_type=2,
-                     norm='ortho', n_fft=self.win_size, hop_length=self.hop_size, htk=False,
-                     center=True, pad_mode='reflect'
-                 ).reshape(features.shape))
+                 compute_mfcc(signal[i]).reshape(features.shape))
             )
 
 
