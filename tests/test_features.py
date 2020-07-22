@@ -4,6 +4,7 @@ import pytest
 
 from audio_loader.features.raw_audio import WindowedAudio
 from audio_loader.features.mfcc import WindowedMFCC
+from audio_loader.features.log_spectrogram import WindowedLogSpectrogram
 
 
 class TestRawAudio:
@@ -56,3 +57,25 @@ class TestMFCC:
         assert mfcc_normalized.shape[-2] == 1 + int((len(signal) - 1024 + 1024) / 512)
         assert mfcc_no_overlap.shape[-1] == 32
         assert mfcc_no_overlap.shape[-2] == 1 + int((len(signal) - 1024 + 1024) / 1024)
+
+
+class TestLogSpectrogram:
+    """Test the log_spectrogram module."""
+
+    def test_windowed(self, testing_audio):
+        """Test the WindowedLogSpectrogram class."""
+        signal, samplerate = testing_audio
+        try:
+            feature_extractor = WindowedLogSpectrogram(1024, 512, 16000, normalize=True)
+            log_spec_normalized = feature_extractor.process(signal, samplerate)
+            feature_extractor_no = WindowedLogSpectrogram(1024, 1024, 16000, normalize=True)
+            log_spec_no_overlap = feature_extractor_no.process(signal, samplerate)
+
+        except Exception as exception:
+            pytest.fail(f"Unexpected  error: {exception}")
+
+        assert (log_spec_normalized.max() <= 1) and (log_spec_normalized.min() >= -1)
+        assert log_spec_normalized.shape[-1] == 1 + 1024/2
+        assert log_spec_normalized.shape[-2] == 1 + int((len(signal) - 1024 + 1024) / 512)
+        assert log_spec_no_overlap.shape[-1] == 1 + 1024/2
+        assert log_spec_no_overlap.shape[-2] == 1 + int((len(signal) - 1024 + 1024) / 1024)
