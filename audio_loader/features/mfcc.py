@@ -5,7 +5,7 @@ from audio_loader.features.feature_extractor import FeatureExtractor
 
 
 class WindowedMFCC(FeatureExtractor):
-    """Get windowded MFC coeficients."""
+    """Get windowed MFC coefficients."""
 
     def __init__(self, win_size, hop_size, sampling_rate, n_mfcc, normalize=True):
         """Initialize the parameters to compute.
@@ -32,11 +32,10 @@ class WindowedMFCC(FeatureExtractor):
         self.n_mfcc = n_mfcc
 
     def process(self, signal, sampling_rate):
-        """Compute windowed mfcc from the signal.
+        """Compute windowed MFCC from the signal.
 
-        Parameters:
-        -----------
-
+        Parameters
+        ----------
         signal: array
             Shape should be (raw, channel).
 
