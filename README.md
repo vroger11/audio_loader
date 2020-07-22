@@ -4,7 +4,7 @@ Library designed to load audio batches (with features and ground truth) for deep
 It is for now an early work that I do alongside of my PhD (I use this library for my different projects).
 Many things are missing but some are on their way like a documentation website.
 
-It supports computations of features such as raw audio and MFCC (using [librosa](https://librosa.github.io/librosa/)) more binding will be available in the future.
+It supports computations of features such as raw audio, MFCC and log spectrogram (using [librosa](https://librosa.github.io/librosa/)) more binding will be available in the future.
 It is designed to ease the creation of new parsers for new datasets/challenges (supervised or not).
 To do so, the library provide handy interfaces the users should follow.
 Have a look into `audio_loader/ground_truth` package for more details.
