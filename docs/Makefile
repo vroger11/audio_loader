@@ -8,6 +8,12 @@ SPHINXBUILD   ?= sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = ../../audio_loader_gh_pages/
 
+
+# build and commit
+pushhtml: html
+	cd $(BUILDDIR); git add . ; git commit -m "rebuilt docs"; git push origin gh-pages
+
+
 # Put it first so that "make" without argument is like "make help".
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
