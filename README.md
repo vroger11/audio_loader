@@ -2,6 +2,8 @@
 
 Library designed to load audio batches (with features and ground truth) for deep learning libraries such as PyTorch or TensorFlow.
 
+Its online documentation is [here](http://website.vincent-roger.fr/audio_loader/).
+
 It is for now an early work that I do along my PhD (I use this library for my different projects).
 Many things are missing but some are on their way like a documentation website.
 
