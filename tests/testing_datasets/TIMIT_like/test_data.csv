@@ -1,5 +1,0 @@
-﻿index,test_or_train,dialect_region,speaker_id,filename,path_from_data_dir,is_converted_audio,is_audio
-1,TEST,DR4,S3,S3_1.wav,test/S3_1.wav,TRUE,TRUE
-2,TEST,DR4,S3,S3_1.PHN,test/S3_1.PHN,FALSE,FALSE
-3,TEST,DR4,S3,S3_1.TXT,test/S3_1.TXT,FALSE,FALSE
-4,TEST,DR4,S3,S3_1.WRD,test/S3_1.WRD,FALSE,FALSE

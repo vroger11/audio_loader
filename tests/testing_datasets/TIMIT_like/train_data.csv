@@ -1,5 +1,0 @@
-index,test_or_train,dialect_region,speaker_id,filename,path_from_data_dir,is_converted_audio,is_audio
-1,TRAIN,R1,S1,S1_1.WAV,train/R1/S1_1.WAV,TRUE,TRUE
-2,TRAIN,R1,S1,S1_1.PHN,train/R1/S1_1.PHN,FALSE,FALSE
-3,TRAIN,R1,S1,S1_1.WRD,train/R1/S1_1.WRD,FALSE,FALSE
-4,TRAIN,R1,S1,S1_1.PHN,train/R1/S1_1.PHN,FALSE,FALSE

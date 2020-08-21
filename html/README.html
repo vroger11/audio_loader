@@ -1,0 +1,157 @@
+
+
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Loader &#8212; Audio Loader  documentation</title>
+    <link rel="stylesheet" href="_static/p_sphinx_theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/local_fonts.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
+    <script src="_static/jquery.cookie.js"></script>
+    <script src="_static/p_sphinx_theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Library Class Diagram" href="diagrams.html" />
+    <link rel="prev" title="Welcome to Audio Loader’s documentation" href="index.html" /> 
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+  </head><body>
+      <div class="relbar-top">
+            
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="diagrams.html" title="Library Class Diagram"
+             accesskey="N">next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Audio Loader’s documentation"
+             accesskey="P">previous</a> &nbsp; &nbsp;</li>
+      <li><a href="index.html">Audio Loader  documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Audio Loader</a></li> 
+      </ul>
+    </div>
+      </div>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="audio-loader">
+<h1>Audio Loader<a class="headerlink" href="#audio-loader" title="Permalink to this headline">¶</a></h1>
+<p>Library designed to load audio batches (with features and ground truth) for deep learning libraries such as PyTorch or TensorFlow.</p>
+<p>It is for now an early work that I do along my PhD (I use this library for my different projects).
+Many things are missing but some are on their way like a documentation website.</p>
+<p>It supports computations of features such as raw audio, MFCC and log spectrogram (using <a class="reference external" href="https://librosa.github.io/librosa/">librosa</a>) more binding will be available in the future.
+Also designed to ease the creation of new parsers for new datasets/challenges (supervised or not).
+To do so, the library provides handy interfaces the users should follow.
+Have a look into <code class="docutils literal notranslate"><span class="pre">audio_loader/ground_truth</span></code> package for more details.</p>
+<p>For now, only a TIMIT like parser (with only phoneme ground truth support for now) and a C2SI-like parser are shared and only PyTorch is supported (TensorFlow support and other datasets are on my TODO list).</p>
+<p>Feel free to add other libraries and/or challenges support with adequate tests.</p>
+<div class="section" id="install">
+<h2>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="miniconda">
+<h3>Miniconda<a class="headerlink" href="#miniconda" title="Permalink to this headline">¶</a></h3>
+<p>To install it you needs anaconda or miniconda installed then you to type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env create -f environment.yml
+conda activate audio_loader
+</pre></div>
+</div>
+<p>All tests passed using this environment.</p>
+</div>
+</div>
+<div class="section" id="check-if-tests-pass">
+<h2>Check if tests pass<a class="headerlink" href="#check-if-tests-pass" title="Permalink to this headline">¶</a></h2>
+<p>For this project I used <a class="reference external" href="https://docs.pytest.org/en/latest/">pytest</a> to write my tests. To try if every tests pass on your side, just type:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>py.test tests/
+</pre></div>
+</div>
+<p>If you want to improve mines feel free to help.</p>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="sphinxlocaltoc">
+    <h3><a href="index.html">Page contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Audio Loader</a><ul>
+<li><a class="reference internal" href="#install">Install</a><ul>
+<li><a class="reference internal" href="#miniconda">Miniconda</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#check-if-tests-pass">Check if tests pass</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/README.md.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+      <div class="relbar-bottom">
+            
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="diagrams.html" title="Library Class Diagram"
+             >next</a> &nbsp; &nbsp;</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to Audio Loader’s documentation"
+             >previous</a> &nbsp; &nbsp;</li>
+      <li><a href="index.html">Audio Loader  documentation</a> &#187;</li>
+
+        <li class="nav-item nav-item-this"><a href="">Audio Loader</a></li> 
+      </ul>
+    </div>
+      </div>
+
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Vincent ROGER.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.1.2.
+    </div>
+      <!-- PSphinxTheme -->
+  </body>
+</html>
