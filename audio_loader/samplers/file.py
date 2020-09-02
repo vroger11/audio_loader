@@ -17,10 +17,8 @@ class FileSampler(SamplerBase):
 
     def __init__(self, feature_processors, groundtruth, supervised=True, output_filepath=False):
         """Initialize the sampler."""
-        # seg_size and overlap will not be used in this sampler
         super().__init__(feature_processors, groundtruth,
-                         seg_size=feature_processors[0].win_size+1,
-                         overlap=0, supervised=supervised,
+                         supervised=supervised,
                          output_filepath=output_filepath)
 
     def get_samples_from(self, selected_set, randomize_files=False):

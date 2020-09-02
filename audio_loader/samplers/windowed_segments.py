@@ -8,11 +8,49 @@ import soundfile as sf
 from audio_loader.samplers.decorator import SamplerBase
 
 
-class WindowedSampler(SamplerBase):
+class WindowedSegmentSampler(SamplerBase):
     """Create samples with associated groundtruth.
 
     No cache involved.
     """
+
+    def __init__(self, feature_processors, groundtruth, seg_size, overlap=0.5, supervised=True,
+                 output_filepath=False, activity_detection=None):
+        """Initialize the sampler.
+
+        Parameters
+        ----------
+        feature_processors: list
+            List of feature processors.
+
+        groundtruth:
+            Contains methods allowing to get all sets + groundtruth.
+
+        seg_size: integer (greather than 0)
+            Size of segments in number of samples.
+
+        overlap: float between 0. and 1.
+            Overlap of the segments.
+
+        supervised: boolean
+            Return the groundthruth alongside with each sample.
+        """
+        super().__init__(feature_processors, groundtruth,
+                         supervised=supervised, output_filepath=output_filepath)
+
+
+        if self.fe_win_size > seg_size:
+            raise Exception("seg_size should be lager or equel to feature extractors win_size")
+
+        self.n_frames_select = 1 + int((seg_size - self.fe_win_size) / self.fe_hop_size)
+        self.n_frames_hop = int(self.n_frames_select * (1 - overlap))
+        if self.n_frames_hop < 1:
+            raise Exception(
+                f"seg_size {seg_size} is too small for the chosen extractor(s)")
+
+        self.seg_size = self.fe_win_size + (self.n_frames_select-1) * self.fe_hop_size
+        self.hop_seg_size = self.fe_win_size + (self.n_frames_hop-1) * self.fe_hop_size
+
 
     def get_samples_from(self, selected_set, randomize_files=False):
         """Iterator other the ground truth."""
