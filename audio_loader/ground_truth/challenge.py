@@ -2,11 +2,10 @@
 import abc
 
 from math import ceil, modf
+from os.path import join, splitext
 
 import numpy as np
 import soundfile as sf
-
-from os.path import join, splitext
 
 
 class Challenge(abc.ABC):
