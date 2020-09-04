@@ -7,7 +7,7 @@ from audio_loader.features.raw_audio import WindowedAudio
 from audio_loader.features.mfcc import WindowedMFCC
 from audio_loader.ground_truth.timit import TimitGroundTruth
 from audio_loader.ground_truth.timit import PHON
-from audio_loader.samplers.windowed import WindowedSampler
+from audio_loader.samplers.windowed_segments import WindowedSegmentSampler
 from audio_loader.samplers.file import FileSampler
 
 
@@ -20,8 +20,8 @@ class TestWindowedSampler:
         audio_extractor = WindowedAudio(1024, 512, 16000, normalize=True, padding=True)
         mfcc_extractor = WindowedMFCC(1024, 512, 16000, n_mfcc=32, normalize=True)
         try:
-            WindowedSampler([audio_extractor], gt_getter, 10000)
-            WindowedSampler([audio_extractor, mfcc_extractor], gt_getter, 10000)
+            WindowedSegmentSampler([audio_extractor], gt_getter, 10000)
+            WindowedSegmentSampler([audio_extractor, mfcc_extractor], gt_getter, 10000)
         except Exception as exception:
             pytest.fail(f"Unexpected  error: {exception}")
 
@@ -31,7 +31,7 @@ class TestWindowedSampler:
         audio_extractor = WindowedAudio(1024, 512, 16000, normalize=True, padding=True)
         mfcc_normalized = WindowedMFCC(1024, 512, 16000, n_mfcc=32, normalize=True)
 
-        sampler = WindowedSampler([audio_extractor], gt_getter, 10000)
+        sampler = WindowedSegmentSampler([audio_extractor], gt_getter, 10000)
         iterator = sampler.get_samples_from("train")
         sample, ground_truth = next(iterator)
         assert np.sum(ground_truth) == 1
@@ -39,7 +39,7 @@ class TestWindowedSampler:
         assert np.isclose(ground_truth[gt_getter.get_index_from("h#")], .97, atol=0.01)
         assert np.isclose(ground_truth[gt_getter.get_index_from("p")], .03, atol=0.01)
 
-        sampler = WindowedSampler([audio_extractor, mfcc_normalized], gt_getter, 10000)
+        sampler = WindowedSegmentSampler([audio_extractor, mfcc_normalized], gt_getter, 10000)
         iterator = sampler.get_samples_from("train")
         sample, ground_truth = next(iterator)
         assert sample.shape == (1, 18, 1056)
@@ -49,7 +49,7 @@ class TestWindowedSampler:
             pass
 
         audio_extractor_no_pad = WindowedAudio(1024, 512, 16000, normalize=True, padding=False)
-        sampler = WindowedSampler([audio_extractor_no_pad], gt_getter, 10000)
+        sampler = WindowedSegmentSampler([audio_extractor_no_pad], gt_getter, 10000)
         iterator = sampler.get_samples_from("train")
         sample, ground_truth = next(iterator)
         assert np.sum(ground_truth) == 1
@@ -63,7 +63,7 @@ class TestWindowedSampler:
         """Test getting filepath along of the batch."""
         gt_getter = TimitGroundTruth(timit_like_path, timit_like_datapath, timit_like_gtpath)
         audio_extractor = WindowedAudio(1024, 512, 16000, normalize=True, padding=True)
-        sampler = WindowedSampler([audio_extractor], gt_getter, 4000, output_filepath=True)
+        sampler = WindowedSegmentSampler([audio_extractor], gt_getter, 4000, output_filepath=True)
         iterator = sampler.get_samples_from("train")
         (_, _), filepath = next(iterator)
         assert filepath == "train/R1/S1_1.WAV"
@@ -74,7 +74,7 @@ class TestWindowedSampler:
         audio_extractor = WindowedAudio(1024, 512, 16000, normalize=True, padding=True)
         mfcc_normalized = WindowedMFCC(1024, 512, 16000, n_mfcc=32, normalize=True)
 
-        sampler = WindowedSampler([audio_extractor, mfcc_normalized], gt_getter, 1536)
+        sampler = WindowedSegmentSampler([audio_extractor, mfcc_normalized], gt_getter, 1536)
         expected_result = {
             "samples": {
                 "WindowedAudio": list(range(0, 1024)),
