@@ -57,15 +57,15 @@ class SamplerBase:
         if self.activity_detection is not None:
             if self.activity_detection.win_size != self.fe_win_size or self.activity_detection.hop_size != self.fe_hop_size:
                 raise Exception(
-                    f"Activity detection Win size and hop size should be the same as for feature extractors.")
+                    "Activity detection Win size and hop size should be the same as for feature extractors.")
 
             if self.activity_detection.padding != self.fe_padding:
                 raise Exception(
-                    f"Activity detection padding should be the same as for feature extractors.")
+                    "Activity detection padding should be the same as for feature extractors.")
 
             if self.activity_detection.sampling_rate != feature_processors[0].sampling_rate:
                 raise Exception(
-                    f"Activity detection padding should have the same expected sampling rate as the feature processors.")
+                    "Activity detection padding should have the same expected sampling rate as the feature processors.")
 
     @abc.abstractmethod
     def get_samples_from(self, selected_set, randomize_files=False):
