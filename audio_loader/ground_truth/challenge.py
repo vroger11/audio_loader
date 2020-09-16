@@ -2,11 +2,10 @@
 import abc
 
 from math import ceil, modf
+from os.path import join, splitext
 
 import numpy as np
 import soundfile as sf
-
-from os.path import join, splitext
 
 
 class Challenge(abc.ABC):
@@ -69,6 +68,17 @@ class Challenge(abc.ABC):
     def get_id(self, filepath):
         """Return the id of an audio filename."""
         return splitext(splitext(filepath)[0])[0].replace(self.data_folderpath, "")
+
+
+    @abc.abstractmethod
+    def get_samples_time_in(self, filepath):
+        """Return a list of tuples corresponding to the start and end times of each sample.
+
+        Parameters:
+        -----------
+        filepath: str
+            Filepath of the audio file we want to get the ground truth times.
+        """
 
     def get_gt_from_time(self, filepath, win_size, hop_size, pad=True):
         """Get full sentence.

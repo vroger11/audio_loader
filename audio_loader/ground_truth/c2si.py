@@ -6,6 +6,7 @@ from os.path import join
 
 import numpy as np
 import pandas as pd
+import soundfile as sf
 
 from audio_loader.ground_truth.challenge import Challenge
 
@@ -160,6 +161,17 @@ class C2SI(Challenge):
             return (len(self.regression_scales), i)
 
         return i
+
+    def get_samples_time_in(self, filepath):
+        """Return a list of tuples corresponding to the start and end times of each sample.
+
+        Parameters:
+        -----------
+        filepath: str
+            Filepath of the audio file we want to get the ground truth times.
+        """
+        info_file = sf.info(filepath)
+        return [(0, info_file.samplerate*info_file.duration)]
 
     def _fill_output(self, id_audio, sample_begin, sample_end, output):
         """Tool to fill an output array.

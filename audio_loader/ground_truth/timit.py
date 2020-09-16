@@ -98,6 +98,22 @@ class TimitGroundTruth(Challenge):
         self.word = word
         self.speaker_id = speaker_id
 
+    def get_samples_time_in(self, filepath):
+        """Return a list of tuples corresponding to the start and end times of each sample.
+
+        Parameters:
+        -----------
+        filepath: str
+            Filepath of the audio file we want to get the ground truth times.
+        """
+        audio_id = self.get_id(filepath)
+        df_file = self.dict_phn_gt[audio_id]
+        res_list = []
+        for row in df_file.iterrows():
+            res_list.append((row[1][0], row[1][1]))
+
+        return res_list
+
     def _fill_output(self, id_audio, sample_begin, sample_end, output):
         """Tool to fill an output array.
 
