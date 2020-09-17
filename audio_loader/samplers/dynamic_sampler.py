@@ -11,7 +11,8 @@ from audio_loader.samplers.decorator import SamplerBase
 class DynamicSampler(SamplerBase):
     """Create samples with associated groundtruth.
 
-    Data outputed are segments with different sizes
+    Data outputed are segments with different sizes.
+    The size depends to groundtruth start and end time for each ground truth samples.
     """
 
     def __init__(self, feature_processors, groundtruth, supervised=True,
@@ -51,7 +52,7 @@ class DynamicSampler(SamplerBase):
             for sample_begin, sample_end in samples_times:
                 # get sample
                 x = None
-                sample_raw_data = signal[sample_begin, sample_end]
+                sample_raw_data = signal[sample_begin:sample_end]
                 for feature_processor in self.feature_processors:
                     if x is None:
                         x = feature_processor.process(sample_raw_data, sr)
