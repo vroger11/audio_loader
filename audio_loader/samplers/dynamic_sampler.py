@@ -60,7 +60,7 @@ class DynamicSampler(SamplerBase):
                         x = np.concatenate((x, feature_processor.process(signal, sr)), axis=2)
 
                 if self.activity_detection is not None:
-                   raise Exception("Dynamic sampler and VAD are not yet implemented")
+                    raise Exception("Dynamic sampler and VAD are not yet implemented")
 
                 # prepare output
                 if self.supervised:
