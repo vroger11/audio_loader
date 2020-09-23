@@ -52,7 +52,10 @@ def get_dataloader_dynamic_size(sampler, batch_size, selected_set):
     padded. Each batch return packed padded sequences.
     """
     train_set = selected_set in ["train", "training"]
-    data = [(torch.tensor(x.transpose(1, 0, 2)), y) for x, y in sampler.get_samples_from(selected_set)]
+
+    # multichannel not supported for pytorch
+    # TODO find a solution for multichannels
+    data = [(torch.tensor(x.reshape(*x.shape[1:])), torch.tensor(y)) for x, y in sampler.get_samples_from(selected_set)]
     dataset = DatasetFromArray(list(data))
 
     if sampler.supervised:
