@@ -114,6 +114,30 @@ class TimitGroundTruth(Challenge):
 
         return res_list
 
+    def get_gt_for(self, filepath):
+        """Get tuples corresponding to the start, end times of each sample and
+        the ground truth expected.
+
+        Parameters:
+        -----------
+        filepath: str
+            Filepath of the audio file we want to get the ground truth.
+        """
+        audio_id = self.get_id(filepath)
+        df_file = self.dict_phn_gt[audio_id]
+        ys = np.zeros((len(df_file.index), self.gt_size))
+
+        res_list = []
+        i = 0
+        for row in df_file.iterrows():
+            sample_begin, sample_end = row[1][0], row[1][1]
+            self._fill_output(audio_id, sample_begin, sample_end, ys[i])
+            res_list.append((sample_begin, sample_end, ys[i]))
+            i += 1
+
+        return res_list
+
+
     def _fill_output(self, id_audio, sample_begin, sample_end, output):
         """Tool to fill an output array.
 
@@ -141,6 +165,17 @@ class TimitGroundTruth(Challenge):
 
         raise Exception("Bad usage of set_gt_format.")
 
+    def get_majority_gt_at_sample(self, filepath, sample_begin, sample_end):
+        """Return an integer that represent the majority class for a specific sample."""
+        if self.phonetic:
+            return self._phon_majority(self.get_id(filepath), sample_begin, sample_end)
+
+        if self.word:
+            raise Exception("Word not yet implemented.")
+
+        if self.speaker_id:
+            raise Exception("Speaker id is not yet implemented.")
+
     def get_output_description(self):
         """Return a list that describe the output."""
         output = []
@@ -154,6 +189,16 @@ class TimitGroundTruth(Challenge):
             raise Exception("Speaker id is not yet implemented.")
 
         return output
+
+    def _phon_majority(self, id_audio, sample_begin, sample_end):
+
+        df_file = self.dict_phn_gt[id_audio]
+        df_corresponding_time = df_file[np.logical_and(df_file["start_time"] < sample_end,
+                                                       df_file["end_time"] >= sample_begin)]
+        if len(df_corresponding_time) > 1:
+            raise Exception("phon majority does not handle multiple labels")
+
+        return df_corresponding_time["phn"].values
 
     def _fill_phon_output(self, id_audio, sample_begin, sample_end, output):
         """Tool to fill an output array.
@@ -192,3 +237,6 @@ def get_dict_phn(gt_folderpath):
         dic[id_fn] = df_file
 
     return dic
+
+
+

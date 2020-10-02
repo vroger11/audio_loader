@@ -80,6 +80,17 @@ class Challenge(abc.ABC):
             Filepath of the audio file we want to get the ground truth times.
         """
 
+    @abc.abstractmethod
+    def get_gt_for(self, filepath):
+        """Get tuples corresponding to the start, end times of each sample and
+        the ground truth expected.
+
+        Parameters:
+        -----------
+        filepath: str
+            Filepath of the audio file we want to get the ground truth.
+        """
+
     def get_gt_from_time(self, filepath, win_size, hop_size, pad=True):
         """Get full sentence.
 
@@ -220,6 +231,10 @@ class Challenge(abc.ABC):
         output = np.zeros(self.gt_size)
         self._fill_output(self.get_id(filepath), sample_begin, sample_end, output)
         return output
+
+    @abc.abstractmethod
+    def get_majority_gt_at_sample(self, filepath, sample_begin, sample_end):
+        """Return an integer that represent the majority class for a specific sample."""
 
     @abc.abstractmethod
     def get_output_description(self):

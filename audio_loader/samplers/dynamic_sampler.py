@@ -48,8 +48,13 @@ class DynamicSampler(SamplerBase):
             signal, sr = sf.read(join(self.groundtruth.data_folderpath, filepath),
                                  always_2d=True, dtype='float32')
 
-            samples_times = self.groundtruth.get_samples_time_in(filepath)
-            for sample_begin, sample_end in samples_times:
+            samples_times = self.groundtruth.get_gt_for(filepath)
+            for sample_tuple in samples_times:
+                if len(sample_tuple):
+                    sample_begin, sample_end, y = sample_tuple
+                else:
+                    sample_begin, sample_end = sample_tuple
+
                 # get sample
                 x = None
                 sample_raw_data = signal[sample_begin:sample_end]
@@ -64,7 +69,6 @@ class DynamicSampler(SamplerBase):
 
                 # prepare output
                 if self.supervised:
-                    y = self.groundtruth.get_gt_at_sample(filepath, sample_begin, sample_end)
                     sample = (x, y)
                 else:
                     sample = tuple(x)
