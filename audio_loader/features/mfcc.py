@@ -7,7 +7,7 @@ from audio_loader.features.feature_extractor import FeatureExtractor
 class WindowedMFCC(FeatureExtractor):
     """Get windowed MFC coefficients."""
 
-    def __init__(self, win_size, hop_size, sampling_rate, n_mfcc, normalize=True):
+    def __init__(self, win_size, hop_size, sampling_rate, n_mfcc, normalize=True, delta_orders=[]):
         """Initialize the parameters to compute.
 
         Parameters
@@ -26,9 +26,12 @@ class WindowedMFCC(FeatureExtractor):
 
         normalize: boolean, optional
             Normalize the data between 0 and 1.
+
+        delta_orders: list, optional
+            list of delta orders to add to the output
         """
         # librosa padding is always True
-        super().__init__(win_size, hop_size, sampling_rate, padding=True)
+        super().__init__(win_size, hop_size, sampling_rate, padding=True, delta_orders=delta_orders)
         self.n_mfcc = n_mfcc
 
     def process(self, signal, sampling_rate):
@@ -45,12 +48,25 @@ class WindowedMFCC(FeatureExtractor):
         self.check_sampling_rate(sampling_rate)
 
         def compute_mfcc(signal):
-            """Compute MFCC with fixed parameters."""
-            return librosa.feature.mfcc(
+            """Compute MFCC with fixed parameters and add deltas at the end."""
+            features = librosa.feature.mfcc(
                 signal, sampling_rate, n_mfcc=self.n_mfcc, dct_type=2,
                 norm='ortho', n_fft=self.win_size, hop_length=self.hop_size, htk=False,
                 center=True, pad_mode='reflect'
             )
+
+            deltas = []
+            # compute deltas
+            for order in self.delta_orders:
+                deltas.append(
+                    librosa.feature.delta(features, order=order, width=5, mode='mirror')
+                )
+
+            # concatenate deltas
+            for delta in deltas:
+                features = np.concatenate((features, delta), axis=0)
+
+            return features
 
         # computation of the first channel
         signal = signal.T
@@ -72,4 +88,4 @@ class WindowedMFCC(FeatureExtractor):
 
     def size_last_dim(self):
         """Return the size of the last dimension when process a signal."""
-        return self.n_mfcc
+        return self.n_mfcc * (len(self.delta_orders) + 1)
