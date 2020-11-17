@@ -21,16 +21,19 @@ PHON = ['h#', 'aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl
         'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl',
         'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
 
+SILENCES = ['pau', 'epi', 'h#']
+
 class TimitGroundTruth(Challenge):
     """Ground truth getter for TIMIT like datasets."""
 
-    def __init__(self, timit_like_root_folderpath, datapath="data", gtpath="data", gt_grouped_file=None):
+    def __init__(self, timit_like_root_folderpath, datapath="data", gtpath="data", gt_grouped_file=None, with_silences=True):
         """Compatible with the TIMIT DARPA dataset available on kaggle.
 
         To use the TIMIT DARPA dataset leave the default arguments as is.
         """
         super().__init__(timit_like_root_folderpath, datapath, gtpath)
 
+        self.with_silences = with_silences
         if gt_grouped_file is None:
             df_train = pd.read_csv(join(self.root_folderpath, "train_data.csv"))
             df_train = df_train[pd.notnull(df_train['path_from_data_dir'])]
@@ -74,7 +77,10 @@ class TimitGroundTruth(Challenge):
         """Return the size of the ground_truth."""
         size = 0
         if self.phonetic:
-            size += len(PHON)
+            if self.with_silences:
+                size += len(PHON)
+            else:
+                size += len(PHON) - len(SILENCES)
 
         if self.word:
             raise Exception("Word not yet implemented.")
@@ -132,7 +138,9 @@ class TimitGroundTruth(Challenge):
         for row in df_file.iterrows():
             sample_begin, sample_end = row[1][0], row[1][1]
             self._fill_output(audio_id, sample_begin, sample_end, ys[i])
-            res_list.append((sample_begin, sample_end, ys[i]))
+            if self.with_silences or ys[i] not in SILENCES:
+                res_list.append((sample_begin, sample_end, ys[i]))
+
             i += 1
 
         return res_list
