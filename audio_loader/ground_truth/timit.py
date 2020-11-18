@@ -15,11 +15,12 @@ import pandas as pd
 from audio_loader.ground_truth.challenge import Challenge
 
 
-PHON = ['h#', 'aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl',
-        'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng', 'epi',
+PHON = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl',
+        'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng',
         'er', 'ey', 'f', 'g', 'gcl', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh',
-        'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pau', 'pcl',
-        'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh']
+        'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pcl',
+        'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh',
+        'pau', 'h#', 'epi']
 
 SILENCES = ['pau', 'epi', 'h#']
 
@@ -138,7 +139,7 @@ class TimitGroundTruth(Challenge):
         for row in df_file.iterrows():
             sample_begin, sample_end = row[1][0], row[1][1]
             self._fill_output(audio_id, sample_begin, sample_end, ys[i])
-            if self.with_silences or ys[i] not in SILENCES:
+            if self.with_silences or np.sum(ys[i]) > 0:
                 res_list.append((sample_begin, sample_end, ys[i]))
 
             i += 1
@@ -230,7 +231,8 @@ class TimitGroundTruth(Challenge):
         for row in df_corresponding_time.iterrows():
             start_frame = max(row[1][0], sample_begin)
             end_frame = min(row[1][1], sample_end)
-            output[self.phon2index[row[1][2]]] += (end_frame - start_frame) / total_samples
+            if self.with_silences or row[1][2] not in SILENCES:
+                output[self.phon2index[row[1][2]]] += (end_frame - start_frame) / total_samples
 
 
 def get_dict_phn(gt_folderpath):
