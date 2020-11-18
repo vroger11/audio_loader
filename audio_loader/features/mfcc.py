@@ -7,7 +7,7 @@ from audio_loader.features.feature_extractor import FeatureExtractor
 class WindowedMFCC(FeatureExtractor):
     """Get windowed MFC coefficients."""
 
-    def __init__(self, win_size, hop_size, sampling_rate, n_mfcc, normalize=True, delta_orders=[]):
+    def __init__(self, win_size, hop_size, sampling_rate, n_mfcc, normalize=True, delta_orders=[], delta_width=5):
         """Initialize the parameters to compute.
 
         Parameters
@@ -29,9 +29,13 @@ class WindowedMFCC(FeatureExtractor):
 
         delta_orders: list, optional
             list of delta orders to add to the output
+
+        delta_width: int
+            Odd number (recomanded 5, 7 or 9)
         """
         # librosa padding is always True
-        super().__init__(win_size, hop_size, sampling_rate, padding=True, delta_orders=delta_orders)
+        super().__init__(win_size, hop_size, sampling_rate, padding=True,
+                         delta_orders=delta_orders, delta_width=delta_width)
         self.n_mfcc = n_mfcc
 
     def process(self, signal, sampling_rate):
@@ -59,7 +63,7 @@ class WindowedMFCC(FeatureExtractor):
             # compute deltas
             for order in self.delta_orders:
                 deltas.append(
-                    librosa.feature.delta(features, order=order, width=5, mode='mirror')
+                    librosa.feature.delta(features, order=order, width=self.delta_width, mode='mirror')
                 )
 
             # concatenate deltas

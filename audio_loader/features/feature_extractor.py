@@ -6,7 +6,7 @@ import abc
 class FeatureExtractor(abc.ABC):
     """Decorator for each feature extractor."""
 
-    def __init__(self, win_size, hop_size, sampling_rate, normalize=True, padding=True, delta_orders=[]):
+    def __init__(self, win_size, hop_size, sampling_rate, normalize=True, padding=True, delta_orders=[], delta_width=5):
         """Create a feature extractor.
 
         Parameters
@@ -29,6 +29,9 @@ class FeatureExtractor(abc.ABC):
 
         delta_orders: list, optional
             list of delta orders to add to the output
+
+        delta_width: int
+            Odd number (recomanded 5, 7 or 9)
         """
         self.win_size = win_size
         self.hop_size = hop_size
@@ -36,6 +39,7 @@ class FeatureExtractor(abc.ABC):
         self.normalize = normalize
         self.padding = padding
         self.delta_orders = delta_orders
+        self.delta_width = delta_width
 
     @abc.abstractmethod
     def process(self, signal, sampling_rate):
