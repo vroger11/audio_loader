@@ -50,6 +50,11 @@ class SamplerBase:
                 raise Exception(
                     "Activity detection padding should have the same expected sampling rate as the feature processors.")
 
+    @property
+    def number_of_classes(self):
+        """Return the number of classes involved in the current dataset."""
+        return self.groundtruth.gt_size
+
     @abc.abstractmethod
     def get_samples_from(self, selected_set, randomize_files=False):
         """Get features and ground truth (if suppervised) from selected_set list."""
