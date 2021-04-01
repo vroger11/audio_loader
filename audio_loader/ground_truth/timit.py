@@ -15,12 +15,17 @@ import pandas as pd
 from audio_loader.ground_truth.challenge import Challenge
 
 
-PHON = ['aa', 'ae', 'ah', 'ao', 'aw', 'ax', 'ax-h', 'axr', 'ay', 'b', 'bcl',
-        'ch', 'd', 'dcl', 'dh', 'dx', 'eh', 'el', 'em', 'en', 'eng',
-        'er', 'ey', 'f', 'g', 'gcl', 'hh', 'hv', 'ih', 'ix', 'iy', 'jh',
-        'k', 'kcl', 'l', 'm', 'n', 'ng', 'nx', 'ow', 'oy', 'p', 'pcl',
-        'q', 'r', 's', 'sh', 't', 'tcl', 'th', 'uh', 'uw', 'ux', 'v', 'w', 'y', 'z', 'zh',
-        'pau', 'h#', 'epi']
+PHON = ['b', 'd', 'g', 'p', 't', 'k', 'dx', 'q',            # Stops
+        'bcl', 'dcl', 'gcl', 'kcl', 'pcl', 'tcl',           # Closure
+        'jh', 'ch',                                         # Affricates
+        's', 'sh', 'z', 'zh', 'f', 'th', 'v', 'dh',         # Fricatives
+        'm', 'n', 'ng', 'em', 'en', 'eng', 'nx',            # Nasals
+        'l', 'r', 'w', 'y', 'hh', 'hv', 'el',               # Semivowels and Glides
+        'iy', 'ih', 'eh', 'ey', 'ae', 'aa', 'aw', 'ay',     # Vowels
+        'ah', 'ao', 'oy', 'ow', 'uh', 'uw', 'ux', 'er',
+        'ax', 'ix', 'axr', 'ax-h',
+        'pau', 'h#', 'epi' # Non-speech event
+        ]
 
 SILENCES = ['pau', 'epi', 'h#']
 
