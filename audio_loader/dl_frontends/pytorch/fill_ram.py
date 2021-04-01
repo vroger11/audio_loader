@@ -1,4 +1,5 @@
 """Module to get dataloaders that fill the CPU RAM."""
+import itertools
 import torch
 
 from torch.nn.utils.rnn import pad_sequence, pack_padded_sequence
@@ -70,7 +71,7 @@ def get_dataset_dynamic_size(sampler, selected_set):
     """
     # multichannel not supported for pytorch
     # TODO find a solution for multichannels
-    data = [(torch.tensor(x.reshape(*x.shape[1:])), torch.tensor(y)) for x, y in sampler.get_samples_from(selected_set)]
+    data = [(torch.tensor(x[0]), torch.tensor(y)) for x, y in sampler.get_samples_from(selected_set)]
     dataset = DatasetFromArray(list(data))
 
     if sampler.supervised:
@@ -107,6 +108,29 @@ def get_dataloader_dynamic_size(sampler, batch_size, selected_set):
     return DataLoader(dataset, batch_size=batch_size,
                       shuffle=train_set, drop_last=train_set,
                       collate_fn=pad_collate_func)
+
+def pad_collate_supervised_contrastive(batch):
+    """Collate function to pad data of supervised contrastive batch for the train set."""
+    (anchor, comp, target) = zip(*batch)
+
+    # anchor data
+    anchor_lens = [len(x) for x in anchor]
+    anchor_padded = pad_sequence(anchor, batch_first=True, padding_value=0.)
+    packed_anchor = pack_padded_sequence(anchor_padded, anchor_lens,
+                                         batch_first=True, enforce_sorted=False)
+    # comp data
+    comp_lens = [len(x) for x in comp]
+    comp_padded = pad_sequence(comp, batch_first=True, padding_value=0.)
+
+    packed_comp = pack_padded_sequence(comp_padded, comp_lens,
+                                       batch_first=True, enforce_sorted=False)
+    return packed_anchor, packed_comp, target
+
+def pad_collate_supervised_contrastive_valid_test(batch):
+    """Collate function to pad data of supervised contrastive batch for the valid and test set."""
+    (comp, target) = zip(*batch)
+
+    return comp, target
 
 
 def pad_collate_supervised(batch):
