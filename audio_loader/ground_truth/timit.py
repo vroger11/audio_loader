@@ -3,8 +3,8 @@
 Based on the version from:
 https://www.kaggle.com/mfekadu/darpa-timit-acousticphonetic-continuous-speech
 """
-import soundfile as sf
 import re
+import soundfile as sf
 
 from os.path import join, splitext
 from pathlib import Path
@@ -64,9 +64,18 @@ class TimitGroundTruth(Challenge):
             self.df_all = self.df_all[self.df_all["is_audio"]]
 
         self.phon2index = {phon:index for index, phon in enumerate(PHON)}
-        self.index2phn = {index:phon for index, phon in enumerate(PHON)}
-        self.dict_phn_gt = get_dict_phn(join(self.root_folderpath, self.gtpath))
+        self.index2phn = PHON
+
+        self.index2speaker_id = pd.unique(self.df_all["speaker_id"])
+        self.speaker_id2index = {speaker_id:index for index, speaker_id in enumerate(self.index2speaker_id)}
+
+        self.dict_gt = get_dict_gt(join(self.root_folderpath, self.gtpath), self.df_all)
         self.set_gt_format()
+
+    @property
+    def number_of_speakers(self):
+        """Return the number of speakers in the Timit challenge."""
+        return len(self.index2speaker_id)
 
     @property
     def training_set(self):
@@ -83,18 +92,25 @@ class TimitGroundTruth(Challenge):
         """Return the size of the ground_truth."""
         size = 0
         if self.phonetic:
-            if self.with_silences:
-                size += len(PHON)
-            else:
-                size += len(PHON) - len(SILENCES)
-
+            size += self.phon_size
         if self.word:
             raise Exception("Word not yet implemented.")
 
         if self.speaker_id:
-            raise Exception("Speaker id not yet implemented.")
+            size += 1
 
         return size
+
+    @property
+    def phon_size(self):
+        if self.with_silences:
+            return len(PHON)
+
+        return len(PHON) - len(SILENCES)
+
+    @property
+    def speaker_id_size(self):
+        return 1
 
     def get_phonem_from(self, index):
         """Return the phoneme corresponding to the given index."""
@@ -119,7 +135,7 @@ class TimitGroundTruth(Challenge):
             Filepath of the audio file we want to get the ground truth times.
         """
         audio_id = self.get_id(filepath)
-        df_file = self.dict_phn_gt[audio_id]
+        df_file, speaker_id = self.dict_gt[audio_id]
         res_list = []
         for row in df_file.iterrows():
             res_list.append((row[1][0], row[1][1]))
@@ -136,7 +152,7 @@ class TimitGroundTruth(Challenge):
             Filepath of the audio file we want to get the ground truth.
         """
         audio_id = self.get_id(filepath)
-        df_file = self.dict_phn_gt[audio_id]
+        df_file, speaker_id = self.dict_gt[audio_id]
         ys = np.zeros((len(df_file.index), self.gt_size))
 
         res_list = []
@@ -169,26 +185,27 @@ class TimitGroundTruth(Challenge):
         """
 
         if self.phonetic:
-            return self._fill_phon_output(id_audio, sample_begin, sample_end, output)
+            self._fill_phon_output(id_audio, sample_begin, sample_end, output[:self.phon_size])
 
         if self.word:
             raise Exception("Word not yet implemented.")
 
         if self.speaker_id:
-            raise Exception("Speaker id is not yet implemented.")
-
-        raise Exception("Bad usage of set_gt_format.")
+            output[-self.speaker_id_size] = self._get_speaker_id(id_audio)
 
     def get_majority_gt_at_sample(self, filepath, sample_begin, sample_end):
         """Return an integer that represent the majority class for a specific sample."""
+        output = []
         if self.phonetic:
-            return self._phon_majority(self.get_id(filepath), sample_begin, sample_end)
+            output += self._phon_majority(self.get_id(filepath), sample_begin, sample_end)
 
         if self.word:
             raise Exception("Word not yet implemented.")
 
         if self.speaker_id:
-            raise Exception("Speaker id is not yet implemented.")
+            output += self._get_speaker_id(self.get_id(filepath))
+
+        return output
 
     def get_output_description(self):
         """Return a list that describe the output."""
@@ -200,13 +217,12 @@ class TimitGroundTruth(Challenge):
             raise Exception("Word not yet implemented.")
 
         if self.speaker_id:
-            raise Exception("Speaker id is not yet implemented.")
+            output += "Speaker Id"
 
         return output
 
     def _phon_majority(self, id_audio, sample_begin, sample_end):
-
-        df_file = self.dict_phn_gt[id_audio]
+        df_file, speaker_id = self.dict_gt[id_audio]
         df_corresponding_time = df_file[np.logical_and(df_file["start_time"] < sample_end,
                                                        df_file["end_time"] >= sample_begin)]
         if len(df_corresponding_time) > 1:
@@ -229,7 +245,7 @@ class TimitGroundTruth(Challenge):
         output: np.array
             Array to modify/fill with ground truth.
         """
-        df_file = self.dict_phn_gt[id_audio]
+        df_file, speaker_id = self.dict_gt[id_audio]
         df_corresponding_time = df_file[np.logical_and(df_file["start_time"] <= sample_end,
                                                        df_file["end_time"] >= sample_begin)]
         total_samples = sample_end - sample_begin
@@ -239,19 +255,31 @@ class TimitGroundTruth(Challenge):
             if self.with_silences or row[1][2] not in SILENCES:
                 output[self.phon2index[row[1][2]]] += (end_frame - start_frame) / total_samples
 
+    def _get_speaker_id(self, id_audio):
+        """Tool to fill an output array.
 
-def get_dict_phn(gt_folderpath):
-    """Get dataframe of the phoneme ground truth."""
+        Parameters
+        ----------
+        id_audio: str
+            Id of the audio file.
+
+        output: np.array
+            Array to modify/fill with ground truth.
+        """
+        _, speaker_id = self.dict_gt[id_audio]
+        return self.speaker_id2index[speaker_id]
+
+def get_dict_gt(gt_folderpath, df_data):
+    """Get dataframe corresponding to the gt."""
     if gt_folderpath[-1] != "/":
         gt_folderpath += "/"
 
     dic = {}
     for filename in Path(gt_folderpath).glob('**/*.PHN'):
         id_fn = splitext(str(filename).replace(gt_folderpath, ""))[0]
+        speaker_id = df_data[df_data["path_from_data_dir"].str.contains(id_fn, regex=False)]["speaker_id"].iloc[0]
         df_file = pd.read_csv(filename, names=["start_time", "end_time", "phn"], delimiter=" ")
-        dic[id_fn] = df_file
+        dic[id_fn] = df_file, speaker_id
 
     return dic
-
-
 
