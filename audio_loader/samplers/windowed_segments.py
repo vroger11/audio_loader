@@ -52,15 +52,29 @@ class WindowedSegmentSampler(SamplerBase):
         self.hop_seg_size = self.fe_win_size + (self.n_frames_hop-1) * self.fe_hop_size
 
 
-    def get_samples_from(self, selected_set, randomize_files=False):
-        """Iterator other the ground truth."""
-        file_list = self.get_file_list(selected_set)
+    def get_samples_from(self, selected_set, randomize_files=False, file_list=None):
+        """Iterator other the ground truth.
+
+        Parameters
+        ----------
+        selected_set: str or list
+             possible keys are: 'train', 'validation', 'test'
+             if it is a list, the list represent filpaths
+        """
+        if isinstance(selected_set, list):
+            file_list = selected_set
+        else:
+            file_list = self.get_file_list(selected_set)
+
         if randomize_files:
             file_list = file_list.copy()  # the shuffle should not impact the initial list
             shuffle(file_list)
 
         for filepath in file_list:
-            signal, sr = sf.read(join(self.groundtruth.data_folderpath, filepath),
+            if not isinstance(selected_set, list):
+                filepath = join(self.groundtruth.data_folderpath, filepath)
+
+            signal, sr = sf.read(filepath,
                                  always_2d=True, dtype='float32')
 
             x = None
