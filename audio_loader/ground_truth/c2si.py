@@ -244,6 +244,21 @@ class C2SI(Challenge):
 
         return output
 
+    def get_gt_for(self, filepath):
+        """Get tuples corresponding to the start, end times of each sample and
+        the ground truth expected.
+
+        Parameters:
+        -----------
+        filepath: str
+            Filepath of the audio file we want to get the ground truth.
+        """
+        raise Exception("Not yet implemented")
+
+    def get_majority_gt_at_sample(self, filepath, sample_begin, sample_end):
+        """Return an integer that represent the majority class for a specific sample."""
+        raise Exception("Not possible with the C2SI dataset")
+
 
 def get_infos(filepath):
     """Return the infos related to the id."""
