@@ -79,14 +79,11 @@ class WindowedMFCC(FeatureExtractor):
         # computation and reshape of the next channels
         features = features.reshape(1, *features.shape)
         for i in range(1, signal.shape[0]):
-            features = np.concatenate(
-                (features,
-                 compute_mfcc(signal[i]).reshape(features.shape))
-            )
+            feature_channel = compute_mfcc(signal[i]).reshape(features.shape)
+            if self.normalize:
+                feature_channel = feature_channel/np.absolute(feature_channel).max()
 
-
-        if self.normalize:
-            features = features/np.absolute(features).max()
+            features = np.concatenate((features, feature_channel))
 
         return features.transpose(0, 2, 1)
 
