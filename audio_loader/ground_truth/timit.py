@@ -4,13 +4,13 @@ Based on the version from:
 https://www.kaggle.com/mfekadu/darpa-timit-acousticphonetic-continuous-speech
 """
 import re
-import soundfile as sf
 
-from os.path import join, splitext
+from os.path import join, splitext, dirname
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import soundfile as sf
 
 from audio_loader.ground_truth.challenge import Challenge
 
@@ -29,10 +29,15 @@ PHON = ['b', 'd', 'g', 'p', 't', 'k', 'dx', 'q',            # Stops
 
 SILENCES = ['pau', 'epi', 'h#']
 
+CLOSURES = ['bcl', 'vcl', 'dcl', 'gcl', 'kcl', 'pcl', 'tcl']
+
+DF_PHON = pd.read_csv(join(dirname(__file__), 'timit_map.csv'), names=["original", "phon_class1", "phon_class2", "phon_class3"])
+
+
 class TimitGroundTruth(Challenge):
     """Ground truth getter for TIMIT like datasets."""
 
-    def __init__(self, timit_like_root_folderpath, datapath="data", gtpath="data", gt_grouped_file=None, with_silences=True):
+    def __init__(self, timit_like_root_folderpath, datapath="data", gtpath="data", gt_grouped_file=None, with_silences=True, phon_class="original", fuse_closures=True, return_original_gt=False):
         """Compatible with the TIMIT DARPA dataset available on kaggle.
 
         To use the TIMIT DARPA dataset leave the default arguments as is.
@@ -40,6 +45,9 @@ class TimitGroundTruth(Challenge):
         super().__init__(timit_like_root_folderpath, datapath, gtpath)
 
         self.with_silences = with_silences
+        self.phon_class = phon_class
+        self.fuse_closures = fuse_closures
+        self.return_original_gt = return_original_gt
         if gt_grouped_file is None:
             df_train = pd.read_csv(join(self.root_folderpath, "train_data.csv"))
             df_train = df_train[pd.notnull(df_train['path_from_data_dir'])]
@@ -63,8 +71,19 @@ class TimitGroundTruth(Challenge):
         else:
             self.df_all = self.df_all[self.df_all["is_audio"]]
 
-        self.phon2index = {phon:index for index, phon in enumerate(PHON)}
-        self.index2phn = PHON
+        if self.phon_class == "original":
+            self.phon2index = {phon:index for index, phon in enumerate(PHON)}
+            self.index2phn = PHON
+            self.silences = SILENCES
+        else:
+            self.index2phn = DF_PHON[self.phon_class].unique()
+            # put silence at last
+            self.index2phn = np.append(np.delete(self.index2phn, np.where(self.index2phn == "sil")), "sil")
+
+            tmp_phon2index = {phon:index for index, phon in enumerate(self.index2phn)}
+            # from original label to desired label
+            self.phon2index = {phon:tmp_phon2index[DF_PHON.loc[DF_PHON["original"] == phon][self.phon_class].values[0]] for phon in DF_PHON["original"].unique()}
+            self.silences = ["sil"]
 
         self.index2speaker_id = pd.unique(self.df_all["speaker_id"])
         self.speaker_id2index = {speaker_id:index for index, speaker_id in enumerate(self.index2speaker_id)}
@@ -104,9 +123,9 @@ class TimitGroundTruth(Challenge):
     @property
     def phon_size(self):
         if self.with_silences:
-            return len(PHON)
+            return len(self.index2phn)
 
-        return len(PHON) - len(SILENCES)
+        return len(self.index2phn) - len(self.silences)
 
     @property
     def speaker_id_size(self):
@@ -157,13 +176,42 @@ class TimitGroundTruth(Challenge):
 
         res_list = []
         i = 0
-        for row in df_file.iterrows():
-            sample_begin, sample_end = row[1][0], row[1][1]
-            self._fill_output(audio_id, sample_begin, sample_end, ys[i])
-            if self.with_silences or np.sum(ys[i]) > 0:
-                res_list.append((sample_begin, sample_end, ys[i]))
+        if self.fuse_closures:
+            previous_label = None
+            previous_sample_begin = None
 
-            i += 1
+            for row in df_file.iterrows():
+                sample_begin, sample_end = row[1][0], row[1][1]
+                self._fill_output(audio_id, sample_begin, sample_end, ys[i])
+                # other way to get gt label
+                gt_label = row[1][2]
+
+                if gt_label in CLOSURES:
+                    previous_label = gt_label
+                    previous_sample_begin = sample_begin
+                else:
+                    if previous_label is not None and previous_label[0] == gt_label:
+                        sample_begin = previous_sample_begin
+
+                    if self.with_silences or np.sum(ys[i]) > 0:
+                        if self.return_original_gt:
+                            res_list.append((sample_begin, sample_end, (ys[i], gt_label)))
+                        else:
+                            res_list.append((sample_begin, sample_end, ys[i]))
+
+                    previous_label = None
+                    previous_sample_begin = None
+
+                i += 1
+
+        else:
+            for row in df_file.iterrows():
+                sample_begin, sample_end = row[1][0], row[1][1]
+                self._fill_output(audio_id, sample_begin, sample_end, ys[i])
+                if self.with_silences or np.sum(ys[i]) > 0:
+                    res_list.append((sample_begin, sample_end, ys[i]))
+
+                i += 1
 
         return res_list
 
@@ -252,7 +300,7 @@ class TimitGroundTruth(Challenge):
         for row in df_corresponding_time.iterrows():
             start_frame = max(row[1][0], sample_begin)
             end_frame = min(row[1][1], sample_end)
-            if self.with_silences or row[1][2] not in SILENCES:
+            if self.with_silences or self.phon2index[row[1][2]] < len(output):
                 output[self.phon2index[row[1][2]]] += (end_frame - start_frame) / total_samples
 
     def _get_speaker_id(self, id_audio):
