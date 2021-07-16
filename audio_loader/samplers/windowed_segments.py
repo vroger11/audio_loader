@@ -34,13 +34,17 @@ class WindowedSegmentSampler(SamplerBase):
 
         supervised: boolean
             Return the groundthruth alongside with each sample.
+
+        activity_detection: audio_loader.actvity_detection
+            Activity detection used to separate the signals, if equals to None the whole file is selected. 
         """
         super().__init__(feature_processors, groundtruth,
-                         supervised=supervised, output_filepath=output_filepath)
+                         supervised=supervised, output_filepath=output_filepath,
+                         activity_detection=activity_detection)
 
 
         if self.fe_win_size > seg_size:
-            raise Exception("seg_size should be lager or equel to feature extractors win_size")
+            raise Exception("seg_size should be larger or equel to feature extractors win_size")
 
         self.n_frames_select = 1 + int((seg_size - self.fe_win_size) / self.fe_hop_size)
         self.n_frames_hop = int(self.n_frames_select * (1 - overlap))
