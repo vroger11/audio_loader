@@ -36,7 +36,7 @@ class WindowedSegmentSampler(SamplerBase):
             Return the groundthruth alongside with each sample.
 
         activity_detection: audio_loader.actvity_detection
-            Activity detection used to separate the signals, if equals to None the whole file is selected. 
+            Activity detection used to separate the signals, if equals to None the whole file is selected.
         """
         super().__init__(feature_processors, groundtruth,
                          supervised=supervised, output_filepath=output_filepath,
@@ -103,7 +103,8 @@ class WindowedSegmentSampler(SamplerBase):
                 # start FIXME y does not have a channel dimension
                 fe_filter = fe_filter.all(axis=0)
                 # end FIXME
-                y = y[fe_filter]
+                if self.supervised:
+                    y = y[fe_filter]
 
             nb_win = x.shape[1]
             n_frames = 1 + int((nb_win - self.n_frames_select) / self.n_frames_hop)
