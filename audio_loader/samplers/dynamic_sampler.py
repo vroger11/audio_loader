@@ -99,24 +99,54 @@ class DynamicSamplerFromAD(SamplerBase):
 
             if self.activity_detection is not None:
                 fe_filter = self.activity_detection.process(signal)
-                x = x[fe_filter]
-                if len(x.shape) != 3:
-                    x = x.reshape(1, *x.shape)
 
-                # start FIXME y does not have a channel dimension
-                fe_filter = fe_filter.all(axis=0)
-                # end FIXME
-                y = y[fe_filter]
-                if merge_gt:
-                    y = y # TODO implement the merging
+                # FIXME add support for multi channels
+                fe_filter = fe_filter[0] # simple hack to make it work for single channel
+                indices_filtered = np.where(fe_filter)[0]
+                indices = []
+                prev = indices_filtered[0]
+                start = indices_filtered[0]
+                for i in range(1, len(indices_filtered)):
+                    if prev+1 == indices_filtered[i]:
+                        prev = prev+1
+                    else:
+                        indices.append((start, prev+1))
+                        start = indices_filtered[i]
+                        prev = indices_filtered[i]
 
-            # prepare output
-            if self.supervised:
-                sample = (x, y)
+                for i, ik in indices:
+                    x_selected = x[0][i:ik] # FIXME multi channel
+                    if len(x_selected.shape) != 3:
+                        x_selected = x_selected.reshape(1, *x_selected.shape)
+
+                    # prepare output
+                    if self.supervised:
+                        # start FIXME y does not have a channel dimension
+                        y_selected = y[i:ik]
+
+                        if merge_gt:
+                            y_selected = y_selected.mean(axis=0)
+
+                        sample = (x_selected, y_selected)
+                    else:
+                        sample = tuple(x_selected)
+
+                    if self.output_filepath:
+                        yield (sample, filepath)
+                    else:
+                        yield sample
+
             else:
-                sample = tuple(x)
+                # prepare output
+                if self.supervised:
+                    if merge_gt:
+                        y = y.mean(axis=0)
 
-            if self.output_filepath:
-                yield (sample, filepath)
-            else:
-                yield sample
+                    sample = (x, y)
+                else:
+                    sample = tuple(x)
+
+                if self.output_filepath:
+                    yield (sample, filepath)
+                else:
+                    yield sample
