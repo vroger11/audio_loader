@@ -28,7 +28,7 @@ class WindowedLogMel(FeatureExtractor):
             Normalize the data between 0 and 1.
         """
         # librosa padding is always True
-        super().__init__(win_size, hop_size, sampling_rate, padding=True)
+        super().__init__(win_size, hop_size, sampling_rate, padding=True, normalize=normalize)
         self.n_mels = n_mels
         self.filter = librosa.filters.mel(sampling_rate, win_size, self.n_mels)
 

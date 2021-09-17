@@ -25,7 +25,7 @@ class WindowedLogSpectrogram(FeatureExtractor):
             Normalize the data between 0 and 1.
         """
         # librosa padding is always True
-        super().__init__(win_size, hop_size, sampling_rate, padding=True)
+        super().__init__(win_size, hop_size, sampling_rate, padding=True, normalize=normalize)
 
     def process(self, signal, sampling_rate):
         """Compute windowed spectrogram from the signal.

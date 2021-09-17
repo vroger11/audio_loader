@@ -34,7 +34,7 @@ class WindowedMFCC(FeatureExtractor):
             Odd number (recomanded 5, 7 or 9)
         """
         # librosa padding is always True
-        super().__init__(win_size, hop_size, sampling_rate, padding=True,
+        super().__init__(win_size, hop_size, sampling_rate, padding=True, normalize=normalize,
                          delta_orders=delta_orders, delta_width=delta_width)
         self.n_mfcc = n_mfcc
 
